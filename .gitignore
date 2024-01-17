@@ -1,0 +1,10 @@
+.venv
+bin
+include
+lib
+lib64
+password.txt
+screenshot.png
+__pycache__
+pyvenv.cfg
+test.py
