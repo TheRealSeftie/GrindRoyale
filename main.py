@@ -42,7 +42,8 @@ class Keypad:
 
 
 if __name__ ==  "__main__":
-
+    
+    ip = "192.168.0.149"
     #distace between lock-screen button centers
     buttonWidth = 275
     buttonHeight = 260
@@ -57,7 +58,7 @@ if __name__ ==  "__main__":
 
 
     async def run_client():
-        async with asyncvnc.connect('192.168.0.149') as client:
+        async with asyncvnc.connect(ip) as client:
         
             def click(x, y, duration=0):
                 client.mouse.move(x, y)
