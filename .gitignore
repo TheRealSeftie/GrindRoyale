@@ -7,3 +7,5 @@ password.txt
 screenshot.png
 __pycache__
 pyvenv.cfg
+*.png
+launch.json
