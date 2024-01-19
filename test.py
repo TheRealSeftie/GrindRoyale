@@ -1,11 +1,64 @@
-
 import asyncio, asyncvnc
 from PIL import Image
-import time
-ip = "192.168.0.149"
+from time import sleep
+from random import randint
+import numpy as np
+from  matplotlib import pyplot as plt
 
 
-async def run_client():
+class Keypad:
+    def __init__(self, startX, startY, buttonWidth, buttonHeight, code):
+        self.startX = startX
+        self.startY = startY
+        self.buttonWidth = buttonWidth
+        self.buttonHeight = buttonHeight
+        self.code = code
+        self.buttons =              [[1, 2, 3],
+                                    [4, 5, 6],
+                                    [7 ,8 ,9],
+                                    ["b",0, "e"] ]
+
+    def getpos(self, code=None):
+        #convert code to positions
+
+        coordinates = []
+        if code == None:
+            code = self.code
+
+        for i in str(code):
+            for j in self.buttons:
+                for k in j:
+                    if str(k) == i:
+                        coordinates.append([j.index(k),self.buttons.index(j)])
+        return coordinates
+
+    def posToCoord(self, pos2D):
+        #convert positions to coords
+        coords = []
+
+        for i in pos2D: 
+            coords.append([self.startX + self.buttonWidth * i[0], self.startY + self.buttonHeight * i[1]])
+        return coords
+
+
+if __name__ ==  "__main__":
+    
+    ip = "192.168.200.231"
+    #distace between lock-screen button centers
+    buttonWidth = 275
+    buttonHeight = 260
+
+    #offset
+    keypadpos = [270, 1150]
+
+    file = open("password.txt", "r")
+    password = file.readline()
+
+    pad = Keypad(keypadpos[0], keypadpos[1], buttonWidth, buttonHeight, password)
+
+
+
+    async def run_client():
         async with asyncvnc.connect(ip) as client:
         
             def click(x, y, duration=0):
@@ -31,47 +84,35 @@ async def run_client():
                     # 800 2000
                     click(random.randint(700, 800), random.randint(1900, 2000), 1)
                 
-                #client.mouse.scroll_down()
-                
-                #click(610, 1920,0.5)
-                #click(630, 1950,0.5)
-                #with client.mouse.hold():
-                #    time.sleep(1)
                 time.sleep(1.5)
-                #click(610, 1700,1)
 
             
-        
-            
+                        
 
-           
+            
             pixels = await client.screenshot()
-            
-            # Save as PNG using PIL/pillow
-            image = Image.fromarray(pixels)
-            image = image.crop((40, 2190, 1050,2200))
-            chests = []
-
-            for i in range(4):
-                chest = image.crop((image.size[0]/4 * i,0, image.size[0]/4 * (i+1), image.size[1]))
-                chests.append(chest)
-
-            for i in chests:
-                i = i.crop((i.size[0]/4, 0, i.size[0]/4 * 3, i.size[1]))
-                i.show()
-
-          
-            # width, height = RGBimage.size
-            # for i in range(width):
-            #     for j in range(height):
-            #         if i == 5:
-            #             print(RGBimage.getpixel((i,j))) 
-
-            # image.show()
-            #image.save('screenshot.png')
                 
+            #image = Image.fromarray(pixels)
+
+            fullchest = Image.fromarray(pixels)
+
+
+            fullchest = fullchest.crop((0, client.video.height/100*80, client.video.width, client.video.height/100*92))
+            chests = []
+            for i in range(4):
+                    chest = fullchest.crop((fullchest.size[0]/4 * i,0, fullchest.size[0]/4 * (i+1), fullchest.size[1]))
+                    chests.append(chest)
+                    
+            slotcenter = []
+            for chest in chests:
+                slotcenter.append(chest.crop((chest.size[0]/2 - 5, chest.size[1] / 2 -5, chest.size[0]/2 + 5, chest.size[1] / 2 + 5)))
+
+            for slot in slotcenter:
+                slot.show()
             
 
-asyncio.run(run_client())
+                
+           
+            
 
-
+    asyncio.run(run_client())
